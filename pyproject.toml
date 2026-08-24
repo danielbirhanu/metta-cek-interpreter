@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 dependencies = []
 
 [project.scripts]
-yourInterpreter = "metta_cek.cli:main"
+danielInterpreter = "metta_cek.cli:main"
 
 [build-system]
 requires = ["setuptools>=68"]

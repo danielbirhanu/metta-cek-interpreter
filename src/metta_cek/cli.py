@@ -8,7 +8,7 @@ import argparse
 def build_parser() -> argparse.ArgumentParser:
     """Build the command-line argument parser."""
     parser = argparse.ArgumentParser(
-        prog="yourInterpreter",
+        prog="danielInterpreter",
         description="Run a deliberately scoped MeTTa-like CEK program.",
     )
     parser.add_argument(
@@ -33,4 +33,3 @@ def main() -> int:
         return 0
     parser.error("program execution is implemented in a later step")
     return 2
-
