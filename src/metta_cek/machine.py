@@ -10,6 +10,7 @@ from .ast import (
     IfExpression, Literal, Program, Variable,
 )
 from .continuations import KApp, KDefine, KIf, KRet, KSequence, Continuation
+from .delta import PRIMITIVE_NAMES, delta
 from .environment import Environment
 from .errors import InterpreterError
 from .values import Closure, Primitive
@@ -33,7 +34,9 @@ class CEKMachine:
 
     def initial_state(self, program: Program) -> State:
         """Create the initial state for a parsed program."""
-        environment = Environment()
+        environment = Environment(
+            {name: Primitive(name) for name in sorted(PRIMITIVE_NAMES)}
+        )
         expressions = program.expressions
         if not expressions:
             return State(None, environment, KRet())
@@ -59,7 +62,8 @@ class CEKMachine:
         if isinstance(control, Literal):
             return self._continue(control.value, environment, continuation)
         if isinstance(control, Variable):
-            return self._continue(environment.lookup(control.name), environment, continuation)
+            value = environment.lookup(control.name)
+            return self._continue(value, environment, continuation)
         if isinstance(control, Application):
             return State(
                 control.operator,
@@ -85,7 +89,12 @@ class CEKMachine:
             return self._continue(control, environment, continuation)
         raise InvalidStateError(f"unsupported control: {control!r}")
 
-    def _continue(self, value: Any, environment: Environment, continuation: Continuation) -> State:
+    def _continue(
+        self,
+        value: Any,
+        environment: Environment,
+        continuation: Continuation,
+    ) -> State:
         if isinstance(continuation, KRet):
             return State(value, environment, continuation)
         if isinstance(continuation, KSequence):
@@ -95,7 +104,11 @@ class CEKMachine:
             return State(
                 next_expression,
                 continuation.saved_environment,
-                KSequence(continuation.saved_environment, continuation.todo[1:], continuation.rest),
+                KSequence(
+                    continuation.saved_environment,
+                    continuation.todo[1:],
+                    continuation.rest,
+                ),
             )
         if isinstance(continuation, KIf):
             if not isinstance(value, bool):
@@ -111,15 +124,26 @@ class CEKMachine:
                 return State(
                     continuation.todo[0],
                     continuation.saved_environment,
-                    KApp(done, continuation.saved_environment, continuation.todo[1:], continuation.rest),
+                    KApp(
+                        done,
+                        continuation.saved_environment,
+                        continuation.todo[1:],
+                        continuation.rest,
+                    ),
                 )
             return self._apply(done, continuation.saved_environment, continuation.rest)
         raise InvalidStateError(f"unsupported continuation: {continuation!r}")
 
-    def _apply(self, values: tuple[Any, ...], environment: Environment, rest: Continuation) -> State:
+    def _apply(
+        self,
+        values: tuple[Any, ...],
+        environment: Environment,
+        rest: Continuation,
+    ) -> State:
         operator, *arguments = values
         if isinstance(operator, Primitive):
-            raise InterpreterError("primitive dispatch is implemented in Step 4")
+            result = delta(operator.name, arguments)
+            return State(result, environment, rest)
         if isinstance(operator, Closure):
             if len(arguments) != len(operator.parameters):
                 raise InterpreterError("function arity validation is implemented in Step 5")
@@ -132,4 +156,3 @@ class CEKMachine:
     @staticmethod
     def _is_value(value: Any) -> bool:
         return isinstance(value, (int, bool, Primitive, Closure)) or value is None
-

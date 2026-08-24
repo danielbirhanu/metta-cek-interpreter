@@ -37,4 +37,3 @@ class Environment:
 
     def __repr__(self) -> str:
         return f"Environment(bindings={self.bindings!r}, parent={self.parent is not None})"
-

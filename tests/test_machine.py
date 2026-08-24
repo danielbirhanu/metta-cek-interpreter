@@ -2,6 +2,7 @@ from metta_cek.ast import Literal, Program, Variable
 from metta_cek.continuations import KRet
 from metta_cek.environment import Environment
 from metta_cek.machine import CEKMachine, State
+from metta_cek.parser import parse
 
 
 def test_literal_reaches_final_state_one_transition() -> None:
@@ -30,4 +31,15 @@ def test_final_state_cannot_step() -> None:
         assert "final" in str(error)
     else:
         raise AssertionError("expected final-state error")
+
+
+def test_primitive_application_uses_cek_application_steps() -> None:
+    machine = CEKMachine()
+    state = machine.initial_state(parse("(+ 2 (* 3 4))"))
+    steps = 0
+    while not machine.is_final(state):
+        state = machine.step(state)
+        steps += 1
+    assert state.control == 14
+    assert steps > 5
 
