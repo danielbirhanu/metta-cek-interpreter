@@ -1,6 +1,5 @@
-def main():
-    print("Hello from metta-cek-interpreter!")
+from metta_cek.cli import main
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
