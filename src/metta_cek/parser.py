@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from .ast import (
-    Application, DefineExpression, Expression, FunctionDefinition,
-    IfExpression, Literal, Program, SetExpression, Variable, WhileExpression,
+    Application, BeginExpression, DefineExpression, Expression,
+    FunctionDefinition, IfExpression, Literal, Program, SetExpression,
+    Variable, WhileExpression,
 )
 from .errors import ParseError
 from .lexer import Token, tokenize
@@ -64,6 +65,10 @@ class Parser:
         if name == "while":
             self._require_arity(name, items, 2, token)
             return WhileExpression(items[0], items[1])
+        if name == "begin":
+            if not items:
+                self._error(token, "begin requires at least one expression")
+            return BeginExpression(tuple(items))
         if name == "set":
             self._require_arity(name, items, 2, token)
             target = self._require_name(items[0], name, token)

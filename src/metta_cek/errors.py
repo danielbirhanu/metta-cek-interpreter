@@ -27,3 +27,7 @@ class UndefinedFunctionError(InterpreterError):
 
 class FunctionArityError(InterpreterError):
     """Raised when a closure receives the wrong number of arguments."""
+
+
+class InvalidAssignmentError(InterpreterError):
+    """Raised when `set` targets an undefined name."""

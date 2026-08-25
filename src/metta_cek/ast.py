@@ -74,8 +74,14 @@ class WhileExpression(Expression):
 
 
 @dataclass(frozen=True)
+class BeginExpression(Expression):
+    """Evaluate expressions in order and return the last value."""
+
+    expressions: tuple[Expression, ...]
+
+
+@dataclass(frozen=True)
 class Program:
     """A source file's ordered top-level expressions."""
 
     expressions: tuple[Expression, ...]
-

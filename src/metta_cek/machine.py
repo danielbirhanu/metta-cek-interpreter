@@ -6,10 +6,14 @@ from dataclasses import dataclass
 from typing import Any
 
 from .ast import (
-    Application, DefineExpression, Expression, FunctionDefinition,
-    IfExpression, Literal, Program, Variable,
+    Application, BeginExpression, DefineExpression, Expression,
+    FunctionDefinition, IfExpression, Literal, Program, SetExpression,
+    Variable, WhileExpression,
 )
-from .continuations import KApp, KDefine, KIf, KRet, KSequence, Continuation
+from .continuations import (
+    KApp, KDefine, KIf, KRet, KSequence, KSet, KWhileBody,
+    KWhileCondition, Continuation,
+)
 from .delta import PRIMITIVE_NAMES, delta
 from .environment import Environment
 from .errors import FunctionArityError, InterpreterError, UndefinedFunctionError
@@ -82,6 +86,25 @@ class CEKMachine:
                 environment,
                 KDefine(control.name, environment, continuation),
             )
+        if isinstance(control, SetExpression):
+            return State(
+                control.value,
+                environment,
+                KSet(control.name, environment, continuation),
+            )
+        if isinstance(control, BeginExpression):
+            return self._begin_state(control.expressions, environment, continuation)
+        if isinstance(control, WhileExpression):
+            return State(
+                control.condition,
+                environment,
+                KWhileCondition(
+                    control.condition,
+                    control.body,
+                    environment,
+                    continuation,
+                ),
+            )
         if isinstance(control, FunctionDefinition):
             closure = Closure(control.parameters, control.body, environment)
             environment.define(control.name, closure)
@@ -119,6 +142,38 @@ class CEKMachine:
         if isinstance(continuation, KDefine):
             continuation.saved_environment.define(continuation.name, value)
             return State(value, continuation.saved_environment, continuation.rest)
+        if isinstance(continuation, KSet):
+            try:
+                continuation.saved_environment.set_existing(continuation.name, value)
+            except Exception as error:
+                raise InvalidStateError(str(error)) from error
+            return State(value, continuation.saved_environment, continuation.rest)
+        if isinstance(continuation, KWhileCondition):
+            if not isinstance(value, bool):
+                raise InterpreterError("while condition must evaluate to a boolean")
+            if value:
+                return State(
+                    continuation.body,
+                    continuation.saved_environment,
+                    KWhileBody(
+                        continuation.condition,
+                        continuation.body,
+                        continuation.saved_environment,
+                        continuation.rest,
+                    ),
+                )
+            return State(False, continuation.saved_environment, continuation.rest)
+        if isinstance(continuation, KWhileBody):
+            return State(
+                continuation.condition,
+                continuation.saved_environment,
+                KWhileCondition(
+                    continuation.condition,
+                    continuation.body,
+                    continuation.saved_environment,
+                    continuation.rest,
+                ),
+            )
         if isinstance(continuation, KApp):
             done = continuation.done + (value,)
             if continuation.todo:
@@ -134,6 +189,19 @@ class CEKMachine:
                 )
             return self._apply(done, continuation.saved_environment, continuation.rest)
         raise InvalidStateError(f"unsupported continuation: {continuation!r}")
+
+    def _begin_state(
+        self,
+        expressions: tuple[Expression, ...],
+        environment: Environment,
+        continuation: Continuation,
+    ) -> State:
+        """Start an explicit sequence without recursively evaluating it."""
+        return State(
+            expressions[0],
+            environment,
+            KSequence(environment, expressions[1:], continuation),
+        )
 
     def _apply(
         self,

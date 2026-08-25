@@ -35,5 +35,15 @@ class Environment:
         """Create an empty child environment."""
         return Environment(parent=self)
 
+    def set_existing(self, name: str, value: Any) -> None:
+        """Update the nearest existing binding in the environment chain."""
+        if name in self.bindings:
+            self.bindings[name] = value
+            return
+        if self.parent is not None:
+            self.parent.set_existing(name, value)
+            return
+        raise UndefinedVariableError(f"undefined variable: {name}")
+
     def __repr__(self) -> str:
         return f"Environment(bindings={self.bindings!r}, parent={self.parent is not None})"

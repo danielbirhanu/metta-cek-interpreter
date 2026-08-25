@@ -52,3 +52,31 @@ class KSequence(Continuation):
     todo: tuple[Any, ...]
     rest: Continuation
 
+
+@dataclass(frozen=True)
+class KSet(Continuation):
+    """An assignment waiting for its new value."""
+
+    name: str
+    saved_environment: Any
+    rest: Continuation
+
+
+@dataclass(frozen=True)
+class KWhileCondition(Continuation):
+    """A while condition waiting to choose another iteration."""
+
+    condition: Any
+    body: Any
+    saved_environment: Any
+    rest: Continuation
+
+
+@dataclass(frozen=True)
+class KWhileBody(Continuation):
+    """A completed while body waiting to re-check its condition."""
+
+    condition: Any
+    body: Any
+    saved_environment: Any
+    rest: Continuation
