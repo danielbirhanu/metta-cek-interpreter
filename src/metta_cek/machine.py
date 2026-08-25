@@ -12,7 +12,7 @@ from .ast import (
 from .continuations import KApp, KDefine, KIf, KRet, KSequence, Continuation
 from .delta import PRIMITIVE_NAMES, delta
 from .environment import Environment
-from .errors import InterpreterError
+from .errors import FunctionArityError, InterpreterError, UndefinedFunctionError
 from .values import Closure, Primitive
 
 
@@ -84,6 +84,7 @@ class CEKMachine:
             )
         if isinstance(control, FunctionDefinition):
             closure = Closure(control.parameters, control.body, environment)
+            environment.define(control.name, closure)
             return self._continue(closure, environment, continuation)
         if self._is_value(control):
             return self._continue(control, environment, continuation)
@@ -146,12 +147,15 @@ class CEKMachine:
             return State(result, environment, rest)
         if isinstance(operator, Closure):
             if len(arguments) != len(operator.parameters):
-                raise InterpreterError("function arity validation is implemented in Step 5")
+                raise FunctionArityError(
+                    f"function expects {len(operator.parameters)} argument(s), "
+                    f"got {len(arguments)}"
+                )
             call_environment = operator.definition_environment.extend()
             for name, value in zip(operator.parameters, arguments):
                 call_environment.define(name, value)
             return State(operator.body, call_environment, rest)
-        raise InterpreterError(f"cannot apply value: {operator!r}")
+        raise UndefinedFunctionError(f"value is not callable: {operator!r}")
 
     @staticmethod
     def _is_value(value: Any) -> bool:

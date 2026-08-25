@@ -19,3 +19,11 @@ class TypeMismatchError(InterpreterError):
 
 class DivisionByZeroError(InterpreterError):
     """Raised when division or modulo uses zero as its divisor."""
+
+
+class UndefinedFunctionError(InterpreterError):
+    """Raised when an application operator is not callable."""
+
+
+class FunctionArityError(InterpreterError):
+    """Raised when a closure receives the wrong number of arguments."""
