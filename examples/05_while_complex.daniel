@@ -1,0 +1,7 @@
+(define i 1)
+(define total 0)
+(while (<= i 5)
+    (begin
+        (set total (+ total i))
+        (set i (+ i 1))))
+total

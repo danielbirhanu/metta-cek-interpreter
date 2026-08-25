@@ -1,0 +1,4 @@
+(define base 3)
+(define (scale x)
+    (* x base))
+(scale 5)
