@@ -7,7 +7,6 @@ from typing import Any
 
 from .errors import ArityError, DivisionByZeroError, TypeMismatchError
 
-
 PRIMITIVE_NAMES = frozenset(
     {
         "+", "-", "*", "/", "%", "<", ">", "<=", ">=",

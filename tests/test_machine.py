@@ -1,7 +1,7 @@
 from metta_cek.ast import Literal, Program, Variable
 from metta_cek.continuations import KRet
 from metta_cek.environment import Environment
-from metta_cek.machine import CEKMachine, State
+from metta_cek.machine import CEKMachine, InvalidStateError, State
 from metta_cek.parser import parse
 
 
@@ -27,7 +27,7 @@ def test_final_state_cannot_step() -> None:
     state = State(3, Environment(), KRet())
     try:
         machine.step(state)
-    except Exception as error:
+    except InvalidStateError as error:
         assert "final" in str(error)
     else:
         raise AssertionError("expected final-state error")
@@ -42,4 +42,3 @@ def test_primitive_application_uses_cek_application_steps() -> None:
         steps += 1
     assert state.control == 14
     assert steps > 5
-

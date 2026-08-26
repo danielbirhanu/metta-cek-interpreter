@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from .errors import InterpreterError
+from .errors import InterpreterError, InvalidAssignmentError
 
 
 class UndefinedVariableError(InterpreterError):
@@ -43,7 +43,7 @@ class Environment:
         if self.parent is not None:
             self.parent.set_existing(name, value)
             return
-        raise UndefinedVariableError(f"undefined variable: {name}")
+        raise InvalidAssignmentError(f"cannot set undefined variable: {name}")
 
     def __repr__(self) -> str:
         return f"Environment(bindings={self.bindings!r}, parent={self.parent is not None})"

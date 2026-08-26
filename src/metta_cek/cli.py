@@ -6,7 +6,6 @@ import argparse
 import sys
 from contextlib import nullcontext
 from pathlib import Path
-from typing import TextIO
 
 from .config import SOURCE_EXTENSION
 from .errors import InterpreterError

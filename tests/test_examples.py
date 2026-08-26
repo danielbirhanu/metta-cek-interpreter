@@ -2,7 +2,6 @@ from pathlib import Path
 
 from metta_cek.cli import run_file
 
-
 EXAMPLES = Path(__file__).parents[1] / "examples"
 
 

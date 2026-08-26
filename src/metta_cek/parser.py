@@ -3,9 +3,17 @@
 from __future__ import annotations
 
 from .ast import (
-    Application, BeginExpression, DefineExpression, Expression,
-    FunctionDefinition, IfExpression, Literal, Program, SetExpression,
-    Variable, WhileExpression,
+    Application,
+    BeginExpression,
+    DefineExpression,
+    Expression,
+    FunctionDefinition,
+    IfExpression,
+    Literal,
+    Program,
+    SetExpression,
+    Variable,
+    WhileExpression,
 )
 from .errors import ParseError
 from .lexer import Token, tokenize

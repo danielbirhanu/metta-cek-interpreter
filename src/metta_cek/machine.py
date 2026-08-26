@@ -6,13 +6,28 @@ from dataclasses import dataclass
 from typing import Any
 
 from .ast import (
-    Application, BeginExpression, DefineExpression, Expression,
-    FunctionDefinition, IfExpression, Literal, Program, SetExpression,
-    Variable, WhileExpression,
+    Application,
+    BeginExpression,
+    DefineExpression,
+    Expression,
+    FunctionDefinition,
+    IfExpression,
+    Literal,
+    Program,
+    SetExpression,
+    Variable,
+    WhileExpression,
 )
 from .continuations import (
-    KApp, KDefine, KIf, KRet, KSequence, KSet, KWhileBody,
-    KWhileCondition, Continuation,
+    Continuation,
+    KApp,
+    KDefine,
+    KIf,
+    KRet,
+    KSequence,
+    KSet,
+    KWhileBody,
+    KWhileCondition,
 )
 from .delta import PRIMITIVE_NAMES, delta
 from .environment import Environment
@@ -143,10 +158,7 @@ class CEKMachine:
             continuation.saved_environment.define(continuation.name, value)
             return State(value, continuation.saved_environment, continuation.rest)
         if isinstance(continuation, KSet):
-            try:
-                continuation.saved_environment.set_existing(continuation.name, value)
-            except Exception as error:
-                raise InvalidStateError(str(error)) from error
+            continuation.saved_environment.set_existing(continuation.name, value)
             return State(value, continuation.saved_environment, continuation.rest)
         if isinstance(continuation, KWhileCondition):
             if not isinstance(value, bool):

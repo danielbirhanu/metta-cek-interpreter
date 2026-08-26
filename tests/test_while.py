@@ -1,6 +1,6 @@
 import pytest
 
-from metta_cek.errors import InvalidStateError
+from metta_cek.errors import InvalidAssignmentError
 from metta_cek.machine import CEKMachine
 from metta_cek.parser import parse
 
@@ -36,5 +36,5 @@ def test_while_false_at_start_returns_false() -> None:
 
 
 def test_set_undefined_name_fails() -> None:
-    with pytest.raises(InvalidStateError):
+    with pytest.raises(InvalidAssignmentError):
         run("(set missing 1)")
